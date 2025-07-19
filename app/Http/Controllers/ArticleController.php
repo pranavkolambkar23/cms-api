@@ -41,25 +41,33 @@ class ArticleController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'title'        => 'required|string|max:255',
-            'content'      => 'required|string',
-            'status'       => 'required|in:Draft,Published,Archived',
-            'published_at' => 'nullable|date',
-            'categories'   => 'array',
-            'categories.*' => 'exists:categories,id',
-        ]);
+        try {
+            $data = $request->validate([
+                'title'        => 'required|string|max:255',
+                'content'      => 'required|string',
+                'status'       => 'required|in:Draft,Published,Archived',
+                'published_at' => 'nullable|date',
+                'categories'   => 'array',
+                'categories.*' => 'exists:categories,id',
+            ]);
 
-        $data['user_id'] = $request->user()->id;
-        $data['slug']    = Str::slug($data['title']);
+            
+                $data['user_id'] = $request->user()->id;
+                $data['slug']    = Str::slug($data['title']);
 
-        $article = Article::create($data);
+                $article = Article::create($data);
 
-        if (!empty($data['categories'])) {
-            $article->categories()->sync($data['categories']);
+            if (!empty($data['categories'])) {
+                $article->categories()->sync($data['categories']);
+            }
+
+            return response()->json($article->load(['author', 'categories']), 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to create article.',
+                'error' => $e->getMessage()
+            ], 422);
         }
-
-        return response()->json($article->load(['author', 'categories']), 201);
     }
 
     /**

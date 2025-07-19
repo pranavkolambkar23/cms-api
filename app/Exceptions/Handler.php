@@ -36,4 +36,30 @@ class Handler extends ExceptionHandler
             'message' => 'Unauthenticated. Please provide a valid token.'
         ], 401);
     }
+
+    public function render($request, Throwable $exception)
+    {
+    
+        if ($exception instanceof \Illuminate\Auth\Access\AuthorizationException) {
+            return response()->json(['message' => 'This action is unauthorized.'], 403);
+        }
+
+        if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+            return response()->json(['message' => 'Resource not found.'], 404);
+        }
+
+        // Default for unhandled exceptions
+        return response()->json([
+            'message' => 'Something went wrong.',
+            'error' => $exception->getMessage(),
+        ], 500);
+        
+
+        return parent::render($request, $exception);
+    }
+
 }
