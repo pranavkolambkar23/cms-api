@@ -10,8 +10,12 @@ class Authenticate extends Middleware
     /**
      * Get the path the user should be redirected to when they are not authenticated.
      */
-    protected function redirectTo(Request $request): ?string
+    protected function redirectTo($request)
     {
-        return $request->expectsJson() ? null : route('login');
+        // Instead of calling route('login') (which doesn't exist), just return null
+        // This prevents Laravel from trying to redirect and throwing 500 error
+        if (! $request->expectsJson()) {
+            return null;
+        }
     }
 }

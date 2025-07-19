@@ -6,20 +6,27 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryController;
 
+// Public routes
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->get('/debug-test', function () {
+    return response()->json(['message' => 'It worked']);
 });
 
+// Protected routes (requires token)
 Route::middleware('auth:sanctum')->group(function () {
+    // Authenticated user info
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    // Logout
     Route::post('/logout', [AuthController::class, 'logout']);
-});
 
-Route::middleware('auth:sanctum')->group(function () {
+    // Articles - accessible by both admin and author
     Route::apiResource('articles', ArticleController::class);
-});
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('categories', CategoryController::class)->middleware('can:manage-categories');
+    // Categories - only accessible by admin (authorization check)
+    Route::apiResource('categories', CategoryController::class)
+        ->middleware('can:manage-categories');
 });
