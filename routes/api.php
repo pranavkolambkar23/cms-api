@@ -9,10 +9,6 @@ use App\Http\Controllers\CategoryController;
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->get('/debug-test', function () {
-    return response()->json(['message' => 'It worked']);
-});
-
 // Protected routes (requires token)
 Route::middleware('auth:sanctum')->group(function () {
     // Authenticated user info
