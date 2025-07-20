@@ -8,7 +8,7 @@ A Content Management System (CMS) built with Laravel that allows users to manage
 
 -   CRUD for Articles and Categories
 -   Filter Articles by:
-    -   Status (`published`, `draft`)
+    -   Status (`published`, `draft`, 'archived')
     -   Category
     -   Publish Date (`published_from`, `published_to`)
 -   Background Job Dispatching using Laravel Queues
@@ -81,6 +81,12 @@ php artisan serve
 The app will be accessible at `http://127.0.0.1:8000`.
 
 ---
+
+## 📬 Postman Collection
+
+You can test the API using Postman. Download or import the following collection:
+
+👉 [CMS API Postman Collection](postman/cms-api.postman_collection.json)
 
 ## 🧪 API Usage
 
