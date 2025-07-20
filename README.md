@@ -64,7 +64,7 @@ php artisan queue:work
 
 > Keep this command running in the background to process queued jobs like slug and summary generation.
 
-### 6. Serve the Application
+### 6. Create Sample users
 
 ```bash
 php artisan db:seed
