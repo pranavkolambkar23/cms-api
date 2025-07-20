@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use App\Jobs\GenerateSlugAndSummary;
 
 class ArticleController extends Controller
 {
@@ -35,7 +35,7 @@ class ArticleController extends Controller
         return response()->json($query->get());
     }
 
-   /**
+    /**
      * POST /api/articles
      * Create a new article (Admin or Author)
      */
@@ -51,17 +51,22 @@ class ArticleController extends Controller
                 'categories.*' => 'exists:categories,id',
             ]);
 
-            
-                $data['user_id'] = $request->user()->id;
-                $data['slug']    = Str::slug($data['title']);
+            $data['user_id'] = $request->user()->id;
 
-                $article = Article::create($data);
+            // Create article without slug and summary (they'll be filled asynchronously)
+            $article = Article::create($data);
 
             if (!empty($data['categories'])) {
                 $article->categories()->sync($data['categories']);
             }
 
-            return response()->json($article->load(['author', 'categories']), 201);
+            // Dispatch async slug & summary generation job
+            GenerateSlugAndSummary::dispatch($article);
+
+            return response()->json([
+                'message' => 'Article created. Slug and summary will be generated shortly.',
+                'data' => $article->load(['author', 'categories']),
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to create article.',
@@ -102,14 +107,15 @@ class ArticleController extends Controller
             'categories.*' => 'exists:categories,id',
         ]);
 
-        if (isset($data['title'])) {
-            $data['slug'] = Str::slug($data['title']);
-        }
-
         $article->update($data);
 
         if (array_key_exists('categories', $data)) {
             $article->categories()->sync($data['categories']);
+        }
+
+        // Dispatch slug & summary regeneration if title or content changed
+        if (isset($data['title']) || isset($data['content'])) {
+            GenerateSlugAndSummary::dispatch($article);
         }
 
         return response()->json($article->load(['author', 'categories']));
