@@ -8,7 +8,7 @@ A Content Management System (CMS) built with Laravel that allows users to manage
 
 -   CRUD for Articles and Categories
 -   Filter Articles by:
-    -   Status (`published`, `draft`, 'archived')
+    -   Status (`published`, `draft`, `archived`)
     -   Category
     -   Publish Date (`published_from`, `published_to`)
 -   Background Job Dispatching using Laravel Queues
